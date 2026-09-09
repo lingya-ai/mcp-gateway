@@ -88,16 +88,16 @@ management_ext.dll）。
 Windows 需要 Visual Studio 2022 的 C++ 工具和 Windows SDK，
 Linux 需要 gcc、glibc 开发文件、zlib 开发文件。两平台分别构建，不使用跨平台 exe。Native 禁用 fallback、使用 NIO/JDK TLS。
 
-Windows 打包：`./scripts/release.ps1 -Version 1.0.0`。
-Linux 打包：`sh scripts/release.sh 1.0.0`。
+Windows 打包：`./scripts/release.ps1 -Version 0.0.1`。
+Linux 打包：`sh scripts/release.sh 0.0.1`。
 产物和 SHA-256 校验文件写入模块 `build/release/`，脚本不上传到外部服务。
 
 Docker 构建上下文为仓库根目录：
 
 ```sh
 docker buildx bake -f docker-bake.hcl --load
-docker run --rm -p 8000:8000 mcp-gateway:1.0.0-node --from stdio -- node /workspace/server.js
-docker run --rm -p 8000:8000 mcp-gateway:1.0.0-uv --from stdio -- uvx mcp-server-fetch
+docker run --rm -p 8000:8000 mcp-gateway:0.0.1-node --from stdio -- node /workspace/server.js
+docker run --rm -p 8000:8000 mcp-gateway:0.0.1-uv --from stdio -- uvx mcp-server-fetch
 ```
 
 镜像包括 base、node（Node.js 24）、uv（Python 3.12 + uv/uvx）三个目标，均以非 root 身份运行。

@@ -1,5 +1,5 @@
 # 在仓库根目录执行 docker buildx bake -f docker-bake.hcl。
-variable "VERSION" { default = "1.0.0" }
+variable "VERSION" { default = "0.0.1" }
 variable "IMAGE_REPOSITORY" { default = "mcp-gateway" }
 group "default" { targets = ["base", "node", "uv"] }
 target "common" {
