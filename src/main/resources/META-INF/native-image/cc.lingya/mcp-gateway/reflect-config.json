@@ -1,0 +1,6 @@
+[
+  {"name":"io.modelcontextprotocol.spec.McpSchema$JSONRPCRequest","allDeclaredConstructors":true,"allPublicMethods":true},
+  {"name":"io.modelcontextprotocol.spec.McpSchema$JSONRPCNotification","allDeclaredConstructors":true,"allPublicMethods":true},
+  {"name":"io.modelcontextprotocol.spec.McpSchema$JSONRPCResponse","allDeclaredConstructors":true,"allPublicMethods":true},
+  {"name":"io.modelcontextprotocol.spec.McpSchema$JSONRPCResponse$JSONRPCError","allDeclaredConstructors":true,"allPublicMethods":true}
+]

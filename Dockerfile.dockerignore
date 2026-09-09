@@ -1,0 +1,9 @@
+**
+!gradlew
+!gradle/
+!gradle/**
+!gradle.properties
+!build.gradle.kts
+!settings.gradle.kts
+!src/
+!src/**
