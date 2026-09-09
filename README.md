@@ -54,6 +54,67 @@ mcp-gateway --from sse --url https://example.com/sse
 网关不监听 HTTPS；需要 TLS 的部署在网关前配置反向代理。远端输入支持 HTTPS，使用 GraalVM 的默认信任库。
 `GET /healthz` 返回 `ok`，不要求访问 Token。退出码：0 正常退出，1 运行失败，2 参数无效。
 
+## 使用 Docker 镜像
+
+已发布的镜像位于 Docker Hub：`moailaozi/mcp-gateway`，平台为 `linux/amd64`。
+Windows 上需要使用 Docker Desktop 的 Linux 容器模式。按子服务需要的运行环境选择镜像：
+
+| 镜像标签 | 内置运行环境 | 适用场景 |
+|----------|--------------|----------|
+| `0.0.1` / `0.0.1-base` | 原生网关 | 远端 MCP 转 stdio，或运行自行挂载的 Linux 可执行程序 |
+| `0.0.1-node` | 原生网关、Node.js 24、npm/npx | Node.js MCP 子服务 |
+| `0.0.1-uv` | 原生网关、Python 3.12、uv/uvx | Python MCP 子服务 |
+
+以下命令使用固定版本；也可以使用 `latest`、`latest-node`、`latest-uv` 获取最新正式版。
+示例均为单行命令，可在 Bash 或 PowerShell 中执行。HTTP 示例默认只向宿主机本地开放端口，分别运行，避免占用同一个 8000 端口。
+
+### 使用 uvx 启动 MCP Fetch 服务
+
+```sh
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.1-uv --from stdio -- uvx mcp-server-fetch
+```
+
+客户端选择 Streamable HTTP，连接 `http://localhost:8000/mcp`。
+可在另一个终端检查健康状态：
+
+```sh
+curl http://localhost:8000/healthz
+```
+
+返回 `ok` 表示网关已启动；子服务在客户端建立 MCP 会话时启动。
+首次运行 `uvx` 需要联网下载子服务依赖。
+
+### 使用 npx 启动 Node.js MCP 服务
+
+```sh
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.1-node --from stdio -- npx -y @modelcontextprotocol/server-memory
+```
+
+客户端同样连接 `http://localhost:8000/mcp`。首次运行 `npx` 需要联网下载依赖。
+默认每个 MCP 会话使用独立子进程；需要所有客户端共享一个子服务时，在 `--from stdio` 后添加 `--process-scope shared`。
+
+### 挂载本地 Node.js MCP 服务
+
+在包含 `server.js` 的目录执行，脚本需实现 MCP stdio 协议：
+
+```sh
+docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/workspace,readonly" moailaozi/mcp-gateway:0.0.1-node --from stdio -- node /workspace/server.js
+```
+
+脚本所需依赖应预先准备在挂载目录中；原生依赖需要与容器的 Linux x64 环境兼容。
+容器使用 UID 10001，挂载文件需允许该用户读取。示例挂载为只读；服务需要写入数据时，另行挂载可写的数据目录。
+
+### 远端 MCP 服务转本地 stdio
+
+将示例 URL 替换为实际的 Streamable HTTP MCP 地址：
+
+```sh
+docker run --rm -i moailaozi/mcp-gateway:0.0.1 --from streamable-http --url https://example.com/mcp
+```
+
+在支持 stdio 的 MCP 客户端中，将 `docker` 配置为命令，其余部分配置为参数。
+`-i` 保持标准输入打开，不要添加 `-t`；此模式无需映射端口。
+
 ## 会话行为
 
 | 输出        | isolated               | shared                         |
