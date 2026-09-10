@@ -2,7 +2,7 @@
 FROM ghcr.io/graalvm/native-image-community:25 AS build
 WORKDIR /workspace
 COPY . .
-ARG VERSION=0.0.2
+ARG VERSION=0.0.3
 RUN --mount=type=cache,target=/root/.gradle \
     sh gradlew nativeCompile -PgatewayVersion=${VERSION} -Pkotlin.compiler.execution.strategy=in-process --no-daemon --configure-on-demand
 

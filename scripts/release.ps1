@@ -1,7 +1,7 @@
 # 在 Windows 构建并打包原生程序，不上传产物。
 param(
     [ValidatePattern('^[0-9]+\.[0-9]+\.[0-9]+(?:-[A-Za-z0-9.-]+)?$')]
-    [string]$Version = '0.0.2'
+    [string]$Version = '0.0.3'
 )
 $ErrorActionPreference = 'Stop'
 $repository = (Resolve-Path -LiteralPath (Join-Path $PSScriptRoot '..')).Path
