@@ -12,7 +12,7 @@ mcp-gateway --from stdio -- uvx mcp-server-fetch
 # 所有客户端共享一个子进程。
 mcp-gateway --from stdio --process-scope shared -- node server.js
 
-# 旧版 SSE；Java SDK 1.1.2 的 SSE 客户端仅声明支持 2024-11-05。
+# 旧版 SSE；使用 2024-11-05 协议版本与 SDK SSE 客户端通信。
 mcp-gateway --from stdio --to sse --process-scope shared --protocol-version 2024-11-05 -- node server.js
 
 mcp-gateway --from stdio --to ws -- node server.js
@@ -61,9 +61,9 @@ Windows 上需要使用 Docker Desktop 的 Linux 容器模式。按子服务需�
 
 | 镜像标签 | 内置运行环境 | 适用场景 |
 |----------|--------------|----------|
-| `0.0.3` / `0.0.3-base` | 原生网关 | 远端 MCP 转 stdio，或运行自行挂载的 Linux 可执行程序 |
-| `0.0.3-node` | 原生网关、Node.js 24、npm/npx | Node.js MCP 子服务 |
-| `0.0.3-uv` | 原生网关、Python 3.12、uv/uvx | Python MCP 子服务 |
+| `1.0.0` / `1.0.0-base` | 原生网关 | 远端 MCP 转 stdio，或运行自行挂载的 Linux 可执行程序 |
+| `1.0.0-node` | 原生网关、Node.js 24、npm/npx | Node.js MCP 子服务 |
+| `1.0.0-uv` | 原生网关、Python 3.12、uv/uvx | Python MCP 子服务 |
 
 以下命令使用固定版本；也可以使用 `latest`、`latest-node`、`latest-uv` 获取最新正式版。
 示例均为单行命令，可在 Bash 或 PowerShell 中执行。HTTP 示例默认只向宿主机本地开放端口，分别运行，避免占用同一个 8000 端口。
@@ -71,7 +71,7 @@ Windows 上需要使用 Docker Desktop 的 Linux 容器模式。按子服务需�
 ### 使用 uvx 启动 MCP Fetch 服务
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.3-uv --from stdio -- uvx mcp-server-fetch
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:1.0.0-uv --from stdio -- uvx mcp-server-fetch
 ```
 
 客户端选择 Streamable HTTP，连接 `http://localhost:8000/mcp`。
@@ -87,7 +87,7 @@ curl http://localhost:8000/healthz
 ### 使用 npx 启动 Node.js MCP 服务
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.3-node --from stdio -- npx -y @modelcontextprotocol/server-memory
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:1.0.0-node --from stdio -- npx -y @modelcontextprotocol/server-memory
 ```
 
 客户端同样连接 `http://localhost:8000/mcp`。首次运行 `npx` 需要联网下载依赖。
@@ -98,7 +98,7 @@ docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.3-node --from s
 在包含 `server.js` 的目录执行，脚本需实现 MCP stdio 协议：
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/workspace,readonly" moailaozi/mcp-gateway:0.0.3-node --from stdio -- node /workspace/server.js
+docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/workspace,readonly" moailaozi/mcp-gateway:1.0.0-node --from stdio -- node /workspace/server.js
 ```
 
 脚本所需依赖应预先准备在挂载目录中；原生依赖需要与容器的 Linux x64 环境兼容。
@@ -109,7 +109,7 @@ docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/
 将示例 URL 替换为实际的 Streamable HTTP MCP 地址：
 
 ```sh
-docker run --rm -i moailaozi/mcp-gateway:0.0.3 --from streamable-http --url https://example.com/mcp
+docker run --rm -i moailaozi/mcp-gateway:1.0.0 --from streamable-http --url https://example.com/mcp
 ```
 
 在支持 stdio 的 MCP 客户端中，将 `docker` 配置为命令，其余部分配置为参数。
@@ -150,16 +150,16 @@ Windows 需要 Visual Studio 2022 的 C++ 工具和 Windows SDK，
 Linux 需要 gcc、glibc 开发文件、zlib 开发文件；macOS 需要 Xcode Command Line Tools（`xcode-select --install`）。
 各平台和架构分别使用对应的 GraalVM 构建，不进行交叉编译。Native 禁用 fallback、使用 NIO/JDK TLS。
 
-Windows 打包：`./scripts/release.ps1 -Version 0.0.3`。
-Linux/macOS 打包：`sh scripts/release.sh 0.0.3`，自动识别当前系统和架构。
+Windows 打包：`./scripts/release.ps1 -Version 1.0.0`。
+Linux/macOS 打包：`sh scripts/release.sh 1.0.0`，自动识别当前系统和架构。
 产物和 SHA-256 校验文件写入模块 `build/release/`，脚本不上传到外部服务。
 
 Docker 构建上下文为仓库根目录：
 
 ```sh
 docker buildx bake -f docker-bake.hcl --load
-docker run --rm -p 8000:8000 mcp-gateway:0.0.3-node --from stdio -- node /workspace/server.js
-docker run --rm -p 8000:8000 mcp-gateway:0.0.3-uv --from stdio -- uvx mcp-server-fetch
+docker run --rm -p 8000:8000 mcp-gateway:1.0.0-node --from stdio -- node /workspace/server.js
+docker run --rm -p 8000:8000 mcp-gateway:1.0.0-uv --from stdio -- uvx mcp-server-fetch
 ```
 
 镜像包括 base、node（Node.js 24）、uv（Python 3.12 + uv/uvx）三个目标，均以非 root 身份运行。

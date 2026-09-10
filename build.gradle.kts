@@ -1,16 +1,16 @@
-// 使用 BOM 固定依赖版本，不启动 Spring Boot 或依赖其他项目。
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm") version "2.3.21"
     application
+    // 使用 BOM 固定依赖版本，不启动 Spring Boot 或依赖其他项目。
     id("io.spring.dependency-management") version "1.1.7"
     id("org.graalvm.buildtools.native") version "1.1.12"
 }
 
 group = "cc.lingya.xiaolingtong"
-version = providers.gradleProperty("gatewayVersion").getOrElse("0.0.3")
+version = providers.gradleProperty("gatewayVersion").getOrElse("1.0.0")
 
 repositories {
     mavenCentral()
@@ -34,9 +34,11 @@ tasks.withType<KotlinCompile>().configureEach {
     }
 }
 
+val mcpVersion = "2.0.1"
+
 dependencies {
-    implementation("io.modelcontextprotocol.sdk:mcp-core:1.1.2")
-    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson3:1.1.2")
+    implementation("io.modelcontextprotocol.sdk:mcp-core:$mcpVersion")
+    implementation("io.modelcontextprotocol.sdk:mcp-json-jackson3:$mcpVersion")
     implementation("io.projectreactor.netty:reactor-netty-http")
     implementation("info.picocli:picocli:4.7.7")
     runtimeOnly("org.slf4j:slf4j-simple")

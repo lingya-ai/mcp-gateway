@@ -1,7 +1,7 @@
 #!/bin/sh
 # 在 Linux x64 或 macOS arm64 构建并打包，不上传产物。
 set -eu
-version=${1:-0.0.3}
+version=${1:-1.0.0}
 case "$version" in *[!A-Za-z0-9.-]*|'') echo 'Invalid version' >&2; exit 2;; esac
 case "$(uname -s)/$(uname -m)" in
     Linux/x86_64) platform=linux-x64;;

@@ -33,7 +33,13 @@ class GatewayBridgeTest {
         )
         messages.forEach { text ->
             val message = GatewayJson.parse(text)
-            assertEquals(message, GatewayJson.fromSdk(GatewayJson.toSdk(message)))
+            val sdkMessage = GatewayJson.toSdk(message)
+            assertEquals(message, GatewayJson.fromSdk(sdkMessage))
+            assertEquals(message, GatewayJson.parse(GatewayJson.sdkMapper.writeValueAsString(sdkMessage)))
+            assertEquals(
+                message,
+                GatewayJson.parse(GatewayJson.sdkMapper.writeValueAsBytes(sdkMessage).toString(Charsets.UTF_8)),
+            )
         }
     }
 
