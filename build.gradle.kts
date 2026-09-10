@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "cc.lingya.xiaolingtong"
-version = providers.gradleProperty("gatewayVersion").getOrElse("0.0.1")
+version = providers.gradleProperty("gatewayVersion").getOrElse("0.0.2")
 
 repositories {
     mavenCentral()

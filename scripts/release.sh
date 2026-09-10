@@ -1,7 +1,7 @@
 #!/bin/sh
 # 在 Linux x64 构建并打包，不上传产物。
 set -eu
-version=${1:-0.0.1}
+version=${1:-0.0.2}
 case "$version" in *[!A-Za-z0-9.-]*|'') echo 'Invalid version' >&2; exit 2;; esac
 test "$(uname -s)" = Linux && test "$(uname -m)" = x86_64
 repository=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)

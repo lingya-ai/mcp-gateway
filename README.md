@@ -61,9 +61,9 @@ Windows 上需要使用 Docker Desktop 的 Linux 容器模式。按子服务需�
 
 | 镜像标签 | 内置运行环境 | 适用场景 |
 |----------|--------------|----------|
-| `0.0.1` / `0.0.1-base` | 原生网关 | 远端 MCP 转 stdio，或运行自行挂载的 Linux 可执行程序 |
-| `0.0.1-node` | 原生网关、Node.js 24、npm/npx | Node.js MCP 子服务 |
-| `0.0.1-uv` | 原生网关、Python 3.12、uv/uvx | Python MCP 子服务 |
+| `0.0.2` / `0.0.2-base` | 原生网关 | 远端 MCP 转 stdio，或运行自行挂载的 Linux 可执行程序 |
+| `0.0.2-node` | 原生网关、Node.js 24、npm/npx | Node.js MCP 子服务 |
+| `0.0.2-uv` | 原生网关、Python 3.12、uv/uvx | Python MCP 子服务 |
 
 以下命令使用固定版本；也可以使用 `latest`、`latest-node`、`latest-uv` 获取最新正式版。
 示例均为单行命令，可在 Bash 或 PowerShell 中执行。HTTP 示例默认只向宿主机本地开放端口，分别运行，避免占用同一个 8000 端口。
@@ -71,7 +71,7 @@ Windows 上需要使用 Docker Desktop 的 Linux 容器模式。按子服务需�
 ### 使用 uvx 启动 MCP Fetch 服务
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.1-uv --from stdio -- uvx mcp-server-fetch
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.2-uv --from stdio -- uvx mcp-server-fetch
 ```
 
 客户端选择 Streamable HTTP，连接 `http://localhost:8000/mcp`。
@@ -87,7 +87,7 @@ curl http://localhost:8000/healthz
 ### 使用 npx 启动 Node.js MCP 服务
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.1-node --from stdio -- npx -y @modelcontextprotocol/server-memory
+docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.2-node --from stdio -- npx -y @modelcontextprotocol/server-memory
 ```
 
 客户端同样连接 `http://localhost:8000/mcp`。首次运行 `npx` 需要联网下载依赖。
@@ -98,7 +98,7 @@ docker run --rm -p 127.0.0.1:8000:8000 moailaozi/mcp-gateway:0.0.1-node --from s
 在包含 `server.js` 的目录执行，脚本需实现 MCP stdio 协议：
 
 ```sh
-docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/workspace,readonly" moailaozi/mcp-gateway:0.0.1-node --from stdio -- node /workspace/server.js
+docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/workspace,readonly" moailaozi/mcp-gateway:0.0.2-node --from stdio -- node /workspace/server.js
 ```
 
 脚本所需依赖应预先准备在挂载目录中；原生依赖需要与容器的 Linux x64 环境兼容。
@@ -109,7 +109,7 @@ docker run --rm -p 127.0.0.1:8000:8000 --mount "type=bind,source=${PWD},target=/
 将示例 URL 替换为实际的 Streamable HTTP MCP 地址：
 
 ```sh
-docker run --rm -i moailaozi/mcp-gateway:0.0.1 --from streamable-http --url https://example.com/mcp
+docker run --rm -i moailaozi/mcp-gateway:0.0.2 --from streamable-http --url https://example.com/mcp
 ```
 
 在支持 stdio 的 MCP 客户端中，将 `docker` 配置为命令，其余部分配置为参数。
@@ -149,16 +149,16 @@ management_ext.dll）。
 Windows 需要 Visual Studio 2022 的 C++ 工具和 Windows SDK，
 Linux 需要 gcc、glibc 开发文件、zlib 开发文件。两平台分别构建，不使用跨平台 exe。Native 禁用 fallback、使用 NIO/JDK TLS。
 
-Windows 打包：`./scripts/release.ps1 -Version 0.0.1`。
-Linux 打包：`sh scripts/release.sh 0.0.1`。
+Windows 打包：`./scripts/release.ps1 -Version 0.0.2`。
+Linux 打包：`sh scripts/release.sh 0.0.2`。
 产物和 SHA-256 校验文件写入模块 `build/release/`，脚本不上传到外部服务。
 
 Docker 构建上下文为仓库根目录：
 
 ```sh
 docker buildx bake -f docker-bake.hcl --load
-docker run --rm -p 8000:8000 mcp-gateway:0.0.1-node --from stdio -- node /workspace/server.js
-docker run --rm -p 8000:8000 mcp-gateway:0.0.1-uv --from stdio -- uvx mcp-server-fetch
+docker run --rm -p 8000:8000 mcp-gateway:0.0.2-node --from stdio -- node /workspace/server.js
+docker run --rm -p 8000:8000 mcp-gateway:0.0.2-uv --from stdio -- uvx mcp-server-fetch
 ```
 
 镜像包括 base、node（Node.js 24）、uv（Python 3.12 + uv/uvx）三个目标，均以非 root 身份运行。
@@ -168,7 +168,8 @@ docker run --rm -p 8000:8000 mcp-gateway:0.0.1-uv --from stdio -- uvx mcp-server
 ## GitHub Actions 发布
 
 工作流 `.github/workflows/docker-publish.yml` 构建 Linux x64 Native 镜像，并推送到
-`moailaozi/mcp-gateway`。运行前在 GitHub 仓库的 Settings → Secrets and variables → Actions 配置：
+`moailaozi/mcp-gateway`；版本标签还会构建 Windows/Linux x64 原生程序并发布 GitHub Release。
+运行前在 GitHub 仓库的 Settings → Secrets and variables → Actions 配置：
 
 - `DOCKER_HUB_USERNAME`：具有该仓库推送权限的 Docker Hub 用户名。
 - `DOCKER_HUB_TOKEN`：Docker Hub Access Token，授予该镜像仓库的写入权限。
@@ -178,6 +179,19 @@ PR 只执行定向测试、镜像构建和 Native 互转验证，不登录或推
 预发布标签（例如 `v1.2.3-rc.1`）不更新 `latest`。手动运行按所选分支或标签采用相同规则。
 每个版本提供默认/base、node、uv 镜像，例如 `1.2.3`、`1.2.3-base`、`1.2.3-node`、`1.2.3-uv`。
 所有发布都在定向测试和实际容器验证成功后执行。GitHub Actions 中使用固定提交版本的第三方 Action。
+
+版本标签的 GitHub Release 包含 GitHub 自动提供的源码归档、Docker Hub 镜像链接和以下附件：
+
+- `mcp-gateway-<版本>-windows-x64.zip`
+- `mcp-gateway-<版本>-linux-x64.tar.gz`
+- 两个压缩包各自对应的 `.sha256` 校验文件。
+
+压缩包包含 `nativeCompile` 可执行文件、辅助动态库、README 和第三方声明，解压后即可运行，无需安装 JVM。
+Windows 使用 Windows Server 2022 构建；Linux 使用 Ubuntu 22.04 构建，需要 glibc 2.35 或更新版本及系统运行库
+（如 libstdc++、zlib），不适用于直接运行在 Alpine/musl 上。
+两平台会对打包目录中的原生程序执行版本检查和 `native-smoke.py` 离线验证。
+Release 在两平台验证与 Docker 镜像发布均成功后发布；预发布标签标记为 prerelease。
+重跑标签工作流会更新同名附件；`main` 分支运行不创建 GitHub Release。
 
 ## 验证
 
